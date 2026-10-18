@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: redcanopies
+    runtime: node
+    plan: starter            # a disk needs a paid plan; free plan loses orders on every deploy
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /robots.txt
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATA_DIR
+        value: /var/data
+      - key: SITE_URL
+        value: https://redcanopies.co.ke
+      - key: ADMIN_KEY
+        generateValue: true
+      - key: SMS_KEY
+        generateValue: true

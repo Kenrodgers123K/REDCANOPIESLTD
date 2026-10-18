@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stainless, Pneumatic & Steam Fittings, Welding Rods, PPE | Red Canopies Ltd Nairobi</title>
+<meta name="description" content="Buy stainless steel fittings, pneumatic fittings, steam and boiler fittings, welding rods and safety PPE in Nairobi. Pay with M-Pesa. Delivery across Kenya.">
+<link rel="canonical" href="{{SITE}}/">
+<meta property="og:title" content="Red Canopies Ltd | Industrial fittings, welding rods and PPE, Nairobi"><meta property="og:type" content="website"><meta property="og:url" content="{{SITE}}/">
+<link rel="icon" href="https://res.cloudinary.com/ddd93hfch/image/upload/f_auto,q_auto/red_canopies_logo_g9gcil">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JTEVWM3M46"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-JTEVWM3M46');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">{{LD}}</script>
+<link rel="stylesheet" href="/style.css"></head><body>
+<header><div class="w"><a class="logo" href="/">RED<b>CANOPIES</b></a>
+<nav aria-label="Categories"><a href="#stainless">Stainless</a><a href="#pneumatic">Pneumatic</a><a href="#steam">Steam & boiler</a><a href="#welding">Welding rods</a><a href="#ppe">PPE</a></nav>
+<button id="cartBtn" aria-label="Open cart">Cart (<span id="n">0</span>)</button></div></header>
+<main>
+<section class="hero"><div class="w"><h1>Fittings, rods and PPE for Kenyan plants</h1>
+<p>Stainless, pneumatic, steam and boiler fittings, welding rods and protective gear from our Industrial Area store in Nairobi. Order online, pay with M-Pesa, and we deliver.</p>
+<label for="q">Find a part</label><input id="q" type="search" placeholder="Try 316, steam trap, 6013, gloves"></div></section>
+<div class="w" id="list">{{CATALOGUE}}</div>
+<section class="about"><div class="w"><h2>Why buy from Red Canopies</h2>
+<p>We supply maintenance teams, fabricators and food processors who cannot wait on a failed fitting. Stock is held in Nairobi, quotes for bulk orders are answered fast, and every order gets a reference you can quote when you call.</p>
+<p>Need a size that is not listed or a bulk price? Email <a href="mailto:info@redcanopies.co.ke">info@redcanopies.co.ke</a> or call <a href="tel:+254143300853">0143 300 853</a>.</p></div></section></main>
+<footer><div class="w">© Red Canopies Ltd, Industrial Area, Nairobi. Prices in KES.</div></footer>
+<aside id="drawer" aria-label="Cart"><div><h2>Your cart <button id="x" aria-label="Close cart" style="border:0;background:none;font-size:1.6rem;cursor:pointer">×</button></h2>
+<div id="items"></div><p><b>Total: KES <span id="tot">0</span></b></p>
+<div id="co"><label for="nm">Full name</label><input class="f" id="nm" autocomplete="name">
+<label for="ph">M-Pesa phone (07XX or 01XX)</label><input class="f" id="ph" type="tel" autocomplete="tel">
+<label for="ad">Delivery address</label><input class="f" id="ad" autocomplete="street-address">
+<button class="pay" id="go">Place order and pay with M-Pesa</button><p class="err" id="er" role="alert"></p></div><div id="done"></div></div></aside>
+<script>
+const P=Object.fromEntries({{DATA}}.map(p=>[p.id,p]));let C={};try{C=JSON.parse(localStorage.getItem('rc')||'{}')}catch(e){}
+const $=id=>document.getElementById(id),save=()=>{try{localStorage.setItem('rc',JSON.stringify(C))}catch(e){}};
+function draw(){let t=0,n=0;$('items').innerHTML=Object.entries(C).filter(([i])=>P[i]).map(([i,q])=>{t+=P[i].price*q;n+=q;return `<div class="li"><span>${P[i].name}<br>KES ${P[i].price}</span><span><button data-d="${i}" aria-label="Less">−</button> ${q} <button data-u="${i}" aria-label="More">+</button></span></div>`}).join('')||'<p>Your cart is empty. Add items from the catalogue.</p>';
+$('n').textContent=n;$('tot').textContent=t.toLocaleString();$('co').style.display=n?'block':'none';save()}
+document.addEventListener('click',e=>{const a=e.target.dataset;
+if(a.id){C[a.id]=(C[a.id]||0)+1;draw();$('drawer').classList.add('open')}
+if(a.u){C[a.u]++;draw()}if(a.d){if(--C[a.d]<=0)delete C[a.d];draw()}});
+$('cartBtn').onclick=()=>$('drawer').classList.add('open');$('x').onclick=()=>$('drawer').classList.remove('open');
+$('q').oninput=e=>{const v=e.target.value.toLowerCase();document.querySelectorAll('.card').forEach(c=>c.style.display=c.textContent.toLowerCase().includes(v)?'':'none')};
+$('go').onclick=async()=>{$('er').textContent='';const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('nm').value,phone:$('ph').value,address:$('ad').value,method:'pochi',items:Object.entries(C).map(([id,qty])=>({id,qty}))})});
+const d=await r.json();if(!r.ok){$('er').textContent=d.error;return}
+C={};draw();$('co').style.display='none';
+$('done').innerHTML=`<div class="msg"><b>Order ${d.ref} received.</b><p>Send <b>KES ${d.total.toLocaleString()}</b> via M-Pesa Pochi la Biashara to <b>${d.pochi}</b>. Then paste the M-Pesa confirmation code below so we can confirm your order.</p><input class="f" id="cd" placeholder="e.g. SHK4X7ABCD" aria-label="M-Pesa code"><button class="pay" id="sc">Confirm payment</button><p class="err" id="ce" role="alert"></p></div>`;
+$('sc').onclick=async()=>{const r=await fetch(`/api/orders/${d.ref}/code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:$('cd').value})});
+r.ok?$('done').innerHTML=`<div class="msg"><b>Thank you.</b> We will confirm payment and call you about delivery. Quote order ${d.ref}.</div>`:$('ce').textContent=(await r.json()).error}};
+draw();const ad=new URLSearchParams(location.search).get('add');if(P[ad]){C[ad]=(C[ad]||0)+1;draw();$('drawer').classList.add('open');history.replaceState(null,'','/')}
+</script></body></html>

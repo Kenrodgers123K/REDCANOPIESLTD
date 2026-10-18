@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Admin | Red Canopies</title>
+<link rel="stylesheet" href="/style.css"><style>.s{overflow-x:auto;margin-bottom:2rem}table{width:100%;border-collapse:collapse;background:#fff;min-width:720px}td,th{padding:.4rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}input,select,button{font:inherit;padding:.35rem;max-width:100%}h2{margin:1.5rem 0 .5rem;font-size:2rem}</style></head>
+<body><div class="w"><h1 style="font-size:3rem;margin-top:1rem">Admin</h1><h2>Orders</h2><div class="s" id="o"></div><h2>Products</h2><div class="s" id="p"></div></div>
+<script>
+let K=sessionStorage.k||prompt('Admin key');const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const api=async(u,m='GET',b)=>{const r=await fetch(u,{method:m,headers:{'x-admin-key':K,'Content-Type':'application/json'},body:b&&JSON.stringify(b)});if(r.status==401){sessionStorage.k='';alert('Wrong key');throw 0}sessionStorage.k=K;return r.json()};
+const ST=['awaiting-payment','payment-submitted','paid','dispatched','delivered','cancelled'],CT={stainless:'Stainless',pneumatic:'Pneumatic',steam:'Steam & boiler',welding:'Welding rods',ppe:'Safety & PPE'};
+const opt=(o,v)=>Object.entries(o).map(([k,l])=>`<option value="${k}" ${k==v?'selected':''}>${l}</option>`).join('');
+async function load(){const [o,p]=await Promise.all([api('/api/admin/orders'),api('/api/products')]);
+$o.innerHTML=`<table><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>M-Pesa code</th><th>Status</th></tr>`+o.map(x=>`<tr><td>${esc(x.ref)}<br>${esc(x.created.slice(0,16).replace('T',' '))}</td><td>${esc(x.name)}<br>${esc(x.phone)}<br>${esc(x.address)}</td><td>${x.lines.map(l=>esc(l.qty+' x '+l.name)).join('<br>')}</td><td>KES ${x.total}</td><td>${esc(x.mpesaCode||'')}</td><td><select data-s="${esc(x.ref)}">${opt(Object.fromEntries(ST.map(s=>[s,s])),x.status)}</select></td></tr>`).join('')+'</table>';
+$p.innerHTML=`<table><tr><th>Photo</th><th>Name</th><th>Spec</th><th>Price</th><th>Category</th><th></th></tr>`+p.map(x=>row(x)).join('')+row({id:'',name:'',spec:'',price:'',cat:'stainless'},1)+'</table>'}
+const row=(x,n)=>`<tr data-i="${esc(x.id)}"><td>${x.image?`<img src="${esc(x.image)}" width="48">`:''}${n?'':'<input type="file" accept="image/*" data-f>'}</td><td><input data-k="name" value="${esc(x.name)}"></td><td><input data-k="spec" value="${esc(x.spec)}"></td><td><input data-k="price" type="number" value="${esc(x.price)}" style="width:6rem"></td><td><select data-k="cat">${opt(CT,x.cat)}</select></td><td><button data-a="save">${n?'Add product':'Save'}</button>${n?'':' <button data-a="del">Delete</button>'}</td></tr>`;
+const $o=document.getElementById('o'),$p=document.getElementById('p');
+document.addEventListener('change',async e=>{const t=e.target;
+if(t.dataset.s){await api(`/api/admin/orders/${t.dataset.s}/status`,'POST',{status:t.value})}
+if(t.dataset.f&&t.files[0]){const f=new FileReader();f.onload=async()=>{const r=await api(`/api/admin/products/${t.closest('tr').dataset.i}/image`,'POST',{data:f.result});r.error?alert(r.error):load()};f.readAsDataURL(t.files[0])}});
+document.addEventListener('click',async e=>{const a=e.target.dataset.a;if(!a)return;const tr=e.target.closest('tr'),id=tr.dataset.i,b={};tr.querySelectorAll('[data-k]').forEach(i=>b[i.dataset.k]=i.value);
+if(a=='del'){if(confirm('Delete this product?'))await api('/api/admin/products/'+id,'DELETE')}else await api(id?'/api/admin/products/'+id:'/api/admin/products',id?'PUT':'POST',b);load()});
+load();
+</script></body></html>
